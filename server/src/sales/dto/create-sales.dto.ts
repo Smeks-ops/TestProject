@@ -93,6 +93,7 @@ export class CreateSalesDto {
     @ApiProperty({
     required: true,
     type: String,
+    enum: [ModeOfDeliveryEnum.COURIER, ModeOfDeliveryEnum.SELF],
     })
     @IsString()
     @IsNotEmpty({ message: 'Mode of Delivery is required' })
