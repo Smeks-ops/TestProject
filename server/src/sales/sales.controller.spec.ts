@@ -48,6 +48,7 @@ describe('SalesController', () => {
         message: 'Sales created successfully',
         data: {
             ...sales,
+            status: true,
             salesDate: new Date(),
             createdAt: new Date(),
             updatedAt: new Date(),
