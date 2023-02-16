@@ -7,6 +7,11 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum ModeOfDelivery {
+  COURIER
+  SELF
+}
+
 model User {
   createdAt DateTime @default(now())
   firstName String?
@@ -72,6 +77,13 @@ model Sales {
   order     Order?   @relation(fields: [orderId], references: [id])
   orderId   String   @unique
   quantity  Int?
+  salesDate DateTime @default(now())
+  deliveryDate DateTime?
+  modeOfPayment String?
+  paymentStatus String?
+  paymentDate DateTime?
+  paymentAmount Int?
+  modeOfDelivery ModeOfDelivery
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
