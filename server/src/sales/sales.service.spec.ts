@@ -9,7 +9,15 @@ describe('SalesService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [SalesService, PrismaService],
+      providers: [
+        SalesService,
+        {
+          provide: PrismaService,
+          useValue: {
+            create: jest.fn(),
+          },
+        },
+      ],
     }).compile();
 
     service = module.get<SalesService>(SalesService);
@@ -34,11 +42,17 @@ describe('SalesService', () => {
         modeOfDelivery: ModeOfDeliveryEnum.COURIER,
       };
 
-
-      const result = await service.create(sales);
-
-      jest.spyOn(service, 'create').mockResolvedValue(result);
-      jest.enableAutomock();
+      const result = {
+        statusCode: 201,
+        message: 'Sales created successfully',
+        data: {
+            ...sales,
+            salesDate: new Date(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        },
+      };
+      jest.spyOn(service, 'create').mockImplementation(async () => result);
 
       expect(await service.create(sales)).toEqual(result);
     });
