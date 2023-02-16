@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `Sales` ADD COLUMN `status` BOOLEAN NOT NULL DEFAULT true;

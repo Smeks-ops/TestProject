@@ -1,10 +1,7 @@
 import { BadRequestException, Injectable, Res } from '@nestjs/common';
 import { CreateSalesDto } from './dto/create-sales.dto';
-import { request } from 'express';
-// import { PrismaService } from "../../prisma/prisma.service";
-import { Prisma, Product, Order, prisma } from '@prisma/client';
 import { PrismaService } from 'nestjs-prisma';
-import { OrderFindUniqueArgs } from '../order/base/OrderFindUniqueArgs';
+import { UpdateSalesDto } from './dto/update-sales.dto';
 
 @Injectable()
 export class SalesService {
@@ -28,7 +25,6 @@ export class SalesService {
           id: orderId,
         },
       });
-
       if (!order) {
         throw new BadRequestException('Order not found');
       }
@@ -40,7 +36,7 @@ export class SalesService {
       });
 
       if (Exists) {
-        throw new Error('Sales already exists');
+        throw new BadRequestException('Sales already exists');
       }
 
       const sales = await this.prisma.sales.create({
@@ -66,18 +62,108 @@ export class SalesService {
   }
 
   async findAll() {
-    return `This action returns all sales`;
+    try {
+      const sales = await this.prisma.sales.findMany({
+        where: {
+          status: true,
+        },
+        include: {
+          order: true,
+        },
+      });
+
+      if (!sales) {
+        throw new BadRequestException('No sales found');
+      }
+
+      return {
+        data: sales,
+        message: 'Sales fetched successfully',
+      };
+    } catch (error: any) {
+      throw new BadRequestException(error.message);
+    }
   }
 
-  async findOne(id: number) {
-    return `This action returns a #${id} sales`;
+  async findOne(id: string) {
+    try {
+      const sales = await this.prisma.sales.findFirst({
+        where: {
+          id,
+          status: true,
+        },
+      });
+
+      if (!sales) {
+        throw new BadRequestException(`Sale with id ${id} not found`);
+      }
+      return {
+        data: sales,
+        message: 'Sales fetched successfully',
+      };
+    } catch (error: any) {
+      throw new BadRequestException(error.message);
+    }
   }
 
-  async update(id: number, updateSalesDto: CreateSalesDto) {
-    return `This action updates a #${id} sales`;
+  async update(id: string, updateSalesDto: UpdateSalesDto) {
+    try {
+      const Exists = await this.prisma.sales.findFirst({
+        where: {
+          id,
+          status: true,
+        },
+      });
+
+      if (!Exists) {
+        throw new BadRequestException(`Sales with id ${id} not found`);
+      }
+
+      const updatedSales = await this.prisma.sales.update({
+        where: {
+          id,
+        },
+        data: {
+          ...updateSalesDto,
+        },
+      });
+
+      return {
+        data: updatedSales,
+        message: 'Sales updated successfully',
+      };
+    } catch (error: any) {
+      throw new BadRequestException(error.message);
+    }
   }
 
-  async remove(id: number) {
-    return `This action removes a #${id} sales`;
+  async delete(id: string) {
+    try {
+      const Exists = await this.prisma.sales.findFirst({
+        where: {
+          id,
+        },
+      });
+
+      if (!Exists) {
+        throw new BadRequestException(`Sales with id ${id} not found`);
+      }
+
+      const deletedSales = await this.prisma.sales.update({
+        where: {
+          id,
+        },
+        data: {
+          status: false,
+        },
+      });
+
+      return {
+        data: deletedSales,
+        message: 'Sales deleted successfully',
+      };
+    } catch (error: any) {
+      throw new BadRequestException(error.message);
+    }
   }
 }
